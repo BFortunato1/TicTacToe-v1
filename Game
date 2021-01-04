@@ -1,0 +1,150 @@
+import random as random
+import numpy as np
+import sys
+
+
+def board_form():
+    global k
+    global ailvl
+    global board
+    print("Welcome to Tic Tac Toe!!")
+    m = int(input('Rows of game?: '))
+    n = int(input('Columns of game?: '))
+    k = int(input('Number of pieces to win?: '))
+    ailvl = int(input('Which level AI?: '))
+    board = [[i for i in range(n)] for i in range(m)]
+    global scores
+    scores = [[0 for i in range(n)] for i in range(m)]
+    print_b()
+
+
+def print_b():
+    count = 0
+    for x in range(len(board)):
+        print(count, board[x])
+        count += 1
+    win = win_state()
+    if win == True:
+        print('You Win!!')
+        sys.exit()
+
+
+def win_state():
+    for row in range(len(scores)):
+        if np.sum(scores[row]) == k:
+            print('You Win!!')
+            sys.exit()
+        if np.sum(scores[row]) == -k:
+            print('AI Wins!!')
+            sys.exit()
+    scorecol = []
+    global scorecol
+    for x in range(len(scores[0])):
+        scorecol.append([column[x] for column in scores])
+
+    for y in range(len(scorecol)):
+        if np.sum(scorecol[y]) == k:
+            print('You Win!!')
+            sys.exit()
+        if np.sum(scorecol[y]) == -k:
+            print('AI Wins!!')
+            sys.exit()
+
+    count = 0
+    negcount = 0
+    for diag in range(len(scores)):
+        if scores[diag][diag] == 1:
+            count += 1
+        if scores[diag][diag] == -1:
+            negcount -= 1
+    if count == k:
+        print('You Win!!')
+        sys.exit()
+    if negcount == -k:
+        print('AI Wins!!')
+        sys.exit()
+
+    count = 0
+    negcount = 0
+    countrdiag = -1
+    for rdiag in range(len(scores)):
+        if scores[rdiag][countrdiag] == 1:
+            count += 1
+            countrdiag -= 1
+        if scores[rdiag][countrdiag] == -1:
+            negcount -= 1
+            countrdiag -= 1
+    if count == k:
+        print('You Win!!')
+        sys.exit()
+    if negcount == -k:
+        print('AI Wins!!')
+        sys.exit()
+
+
+def first_player():  # determine first player to go amd then order of subsequent turns
+    player1 = random.choice([1, 2])
+    if player1 == 1:
+        return 1
+    else:
+        return 2
+
+
+def player_choice():  # maps player choice to corresponding cell on board. Makes sure that cell has not already
+    # been chosen. If it has, asks for a different input.
+    print('Your Turn!')
+    print('Where would you like to place your piece (Numbered Coordinates): ')
+    row = int(input('Row?: '))
+    column = int(input(' Column?: '))
+
+    board[row][column] = 'X'
+    scores[row][column] += 1
+
+    print_b()
+    AI_choice()
+    print(scores)
+
+
+def AI_choice():  # choice of the AI. Takes length of cells for range, then makes sure the indexed cell in a
+    # letter and not an X or an O. If the choice is an X or and O, it runs through the program again.
+    print("It is the AI's turn!")
+    if ailvl == 0:
+        choicerow = random.randrange(len(board))
+        choicecol = random.randrange(len(board[0]))
+
+        if board[choicerow][choicecol] == 'X':
+            AI_choice()
+        if board[choicerow][choicecol] == 'O':
+            AI_choice()
+        else:
+            board[choicerow][choicecol] = 'O'
+            scores[choicerow][choicecol] += -1
+    else:
+        AI_choice()
+
+    if ailvl == 1:
+        for row in range(len(scores)):
+            for column in range(len(scores[0])):
+                if np.sum(scores[row]) == -2:
+                    if scores[row][column] not in 'XO':
+                        scores[row][column] = 'O'
+
+        for y in range(len(scorecol)):
+            for column in range(len(scorecol[0])):
+                if np.sum(scorecol[y]) == -2:
+                    if scorecol[y][column] not in 'XO':
+                        scorecol[y][column] = 'O'
+
+    print_b()
+    player_choice()
+
+
+def game():  # brings all the moving pieces together to form the game.
+    fplayer = first_player()
+    board_form()
+    if fplayer == 1:
+        player_choice()
+    if fplayer == 2:
+        AI_choice()
+
+
